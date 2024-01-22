@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务费用计算器</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f7f7f7;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+    }
+    h1, h2, h3 {
+        color: #333;
+    }
+    form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    label {
+        display: block;
+        margin-top: 10px;
+    }
+    input[type="number"],
+    select,
+    input[type="checkbox"] {
+        margin-top: 5px;
+    }
+    input[type="submit"] {
+        margin-top: 20px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        background-color: #5cb85c;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    input[type="submit"]:hover {
+        background-color: #4cae4c;
+    }
+    #resultSection {
+        margin-top: 20px;
+        background: #e9e9e9;
+        padding: 20px;
+        border-radius: 8px;
+    }
+</style>
+</head>
+<body>
+<h1>服务费用计算器</h1>
+
+<form id="chargeCalculator">
+    <label for="distance">输入公里数 (km):</label>
+    <input type="number" id="distance" name="distance"><br><br>
+    
+    <h2>转运服务:</h2>
+    
+    <label for="toll">路桥费:</label>
+    <input type="checkbox" id="toll" name="services" value="toll"><br><br>
+    
+    <label for="non_reservation">非预约用车费:</label>
+    <input type="checkbox" id="non_reservation" name="services" value="non_reservation"><br><br>
+
+    <label for="critical_patient">濒危病人附加费:</label>
+    <input type="checkbox" id="critical_patient" name="services" value="critical_patient"><br><br>
+
+    <label for="ventilator">呼吸机:</label>
+    <input type="checkbox" id="ventilator" name="services" value="ventilator"><br><br>
+    
+    <label for="medical_staff">医护随车:</label>
+    <select name="medical_staff" id="medical_staff">
+        <option value="none">不需要</option>
+        <option value="one">1位</option>
+        <option value="two">2位</option>
+    </select><br><br>
+
+    <label for="night_transfer">晚间转运费:</label>
+    <select name="night_transfer" id="night_transfer">
+        <option value="none">无</option>
+        <option value="one">1人</option>
+        <option value="two">2人</option>
+    </select><br><br>
+
+        <input type="checkbox" id="waiting_fee" name="services" value="waiting_fee">
+        <label for="waiting_fee">等待费（预收300元，20min免费，超过8元/min）</label><br>
+    
+    <h3>辅助服务:</h3>
+    <div>
+        <input type="checkbox" id="oxygen" name="services" value="oxygen">
+        <label for="oxygen">吸氧费 （ 每公里1元）</label><br>
+        
+        <input type="checkbox" id="ecg_monitoring" name="services" value="ecg_monitoring">
+        <label for="ecg_monitoring">心电监护 （ 每公里2元）</label><br>
+        
+        <input type="checkbox" id="infusion_pump" name="services" value="infusion_pump">
+        <label for="infusion_pump">微量泵 （ 每公里2元）</label><br>
+        
+        <input type="checkbox" id="sputum_suction_machine" name="services" value="sputum_suction_machine">
+        <label for="sputum_suction_machine">吸痰器 （ 100元/次）</label><br>
+        
+        <input type="checkbox" id="handheld_respiratory_bag" name="services" value="handheld_respiratory_bag">
+        <label for="handheld_respiratory_bag">手持呼吸气囊 （ 100元/趟）</label><br>
+        
+        <input type="checkbox" id="disposable_nasal_cannula" name="services" value="disposable_nasal_cannula">
+        <label for="disposable_nasal_cannula">一次性鼻导管（15元/根）</label><br>
+        
+        <input type="checkbox" id="defibrillator" name="services" value="defibrillator">
+        <label for="defibrillator">体外除颤仪 （850元/次）</label><br>
+        
+
+        
+        <label for="stairs">上楼楼层数:</label>
+        <input type="number" id="stairs" name="stairs"><br>
+
+    <label for="space_blanket">太空被:</label>
+    <select name="space_blanket" id="space_blanket">
+        <option value="0">0条</option>
+        <option value="1">1条</option>
+        <option value="2">2条</option>
+    </select><br><br>
+    </div>
+    
+    <input type="submit" value="计算费用">
+</form>
+
+<div id="resultSection"></div>
+
+<script>
+document.getElementById('chargeCalculator').onsubmit = function(event) {
+    event.preventDefault();
+    
+    // 获取用户输入的公里数
+    var distance = parseFloat(document.getElementById('distance').value);
+    var totalCost = 0;
+    var serviceCostDetails = '';
+    
+    // 校验公里数输入
+    if (isNaN(distance) || distance < 0) {
+        alert("请输入有效的公里数。");
+        return;
+    }
+
+    // 转运车费计算
+    var transferCost = 0;
+    if (distance <= 20) {
+        transferCost = 450 + Math.max(0, (distance * 2 - 3)) * 9;
+    } else if (distance <= 50) {
+        transferCost = 500 + Math.max(0, (distance * 2 - 3)) * 9;
+    } else if (distance <= 72) {
+        transferCost = distance*0+1300;
+     } else {
+        transferCost = distance * 2 * 9;
+    }
+    serviceCostDetails += '转运车费: ' + transferCost + '元<br>';
+    totalCost += transferCost;
+
+    // 路桥费计算
+    if (document.getElementById('toll').checked) {
+        totalCost += distance * 0.5;
+        serviceCostDetails += '路桥费: ' + (distance * 0.5) + '元<br>';
+    }
+
+     // 非预约用车费计算
+    if (document.getElementById('non_reservation').checked) {
+        var nonReservationFee = transferCost * 0.1;  // 使用转运车费计算
+        totalCost += nonReservationFee;
+        serviceCostDetails += '非预约用车费: ' + nonReservationFee + '元<br>';
+    }
+
+    // 濒危病人附加费计算
+    var criticalPatientFee = 0;
+    if (document.getElementById('critical_patient').checked) {
+        if (distance <= 20) {
+            criticalPatientFee = 200;
+        } else if (distance <= 50) {
+            criticalPatientFee = 300;
+        } else if (distance <= 72) {
+            criticalPatientFee = 400;
+        } else if (distance <= 150) {
+            criticalPatientFee = distance * 2*2;
+        } else {
+            criticalPatientFee = distance*2;
+        }
+    }
+    totalCost += criticalPatientFee;
+    serviceCostDetails += '濒危病人附加费: ' + criticalPatientFee + '元<br>';
+
+
+    // 呼吸机费用计算
+    var ventilatorCost = 0;
+    if (document.getElementById('ventilator').checked) {
+        if (distance <= 20) {
+            ventilatorCost = 600;
+        } else if (distance <= 150) {
+            ventilatorCost = 800;
+        } else {
+            ventilatorCost = 150 * 5 + (distance - 150) * 5;
+        }
+        totalCost += ventilatorCost;
+        serviceCostDetails += '呼吸机费用: ' + ventilatorCost + '元<br>';
+    }
+
+    // 医护随车费用计算
+    var medicalStaffOption = document.getElementById('medical_staff').value;
+    var medicalStaffCost = 0;
+    if (medicalStaffOption !== 'none') {
+        var perPersonCost = 0;
+        if (distance <= 40) {
+            perPersonCost = 200;
+        } else if (distance <= 90) {
+            perPersonCost = 300;
+        } else if (distance <= 150) {
+            perPersonCost = 400;
+        } else if (distance <= 400) {
+            perPersonCost = 500;
+        } else {
+            perPersonCost = 500 + (distance - 400);
+        }
+        medicalStaffCost = (medicalStaffOption === 'one' ? 1 : 2) * perPersonCost;
+        totalCost += medicalStaffCost;
+        serviceCostDetails += '医护随车费用: ' + medicalStaffCost + '元<br>';
+    }
+
+    // 晚间转运费计算
+    var nightTransferOption = document.getElementById('night_transfer').value;
+    var nightTransferCost = 0;
+    if (nightTransferOption === 'one') {
+        nightTransferCost = 100;
+    } else if (nightTransferOption === 'two') {
+        nightTransferCost = 200;
+    }
+    totalCost += nightTransferCost;
+    serviceCostDetails += '晚间转运费: ' + nightTransferCost + '元<br>';
+
+    // 其他固定费用服务
+    var additionalServices = [
+        {id: 'oxygen', costPerKm: 1, name: '吸氧费'},
+        {id: 'ecg_monitoring', costPerKm: 2, name: '心电监护'},
+        {id: 'infusion_pump', costPerKm: 2, name: '微量泵'}
+    ];
+
+    additionalServices.forEach(function(service) {
+        if (document.getElementById(service.id).checked) {
+            var serviceCost = distance * service.costPerKm;
+            totalCost += serviceCost;
+            serviceCostDetails += service.name + ': ' + serviceCost + '元<br>';
+        }
+    });
+
+    // 固定费用服务
+    var fixedServices = [
+        {id: 'sputum_suction_machine', cost: 100, name: '吸痰器'},
+        {id: 'handheld_respiratory_bag', cost: 100, name: '手持呼吸气囊'},
+        {id: 'disposable_nasal_cannula', cost: 15, name: '一次性鼻导管'},
+        {id: 'defibrillator', cost: 850, name: '体外除颤仪'},
+        {id: 'waiting_fee', cost: 300, name: '等待费'}
+    ];
+
+    fixedServices.forEach(function(service) {
+        if (document.getElementById(service.id).checked) {
+            totalCost += service.cost;
+            serviceCostDetails += service.name + ': ' + service.cost + '元<br>';
+        }
+    });
+
+    // 上楼费计算
+    var floorNumber = parseInt(document.getElementById('stairs').value, 10);
+    if (!isNaN(floorNumber) && floorNumber > 1) {
+        var stairsFee = (floorNumber - 1) * 18;
+        totalCost += stairsFee;
+        serviceCostDetails += '上楼费: ' + stairsFee + '元<br>';
+    }
+
+    // 太空被费用计算
+    var spaceBlanketOption = parseInt(document.getElementById('space_blanket').value, 10);
+    var spaceBlanketCost = spaceBlanketOption * 100; // 每条100元
+    totalCost += spaceBlanketCost;
+    serviceCostDetails += '太空被: ' + spaceBlanketCost + '元<br>';
+
+    // 显示费用明细和总费用
+    var resultSection = document.getElementById('resultSection');
+    resultSection.innerHTML = '<h2>费用明细:</h2>' + serviceCostDetails + '<h2>总费用: ' + totalCost + '元</h2>';
+};
+</script>
+</body>
+</html>
